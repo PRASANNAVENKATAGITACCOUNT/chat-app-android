@@ -21,15 +21,14 @@
             android:windowSoftInputMode="adjustResize"
             />
 
-        <activity android:name=".home.SearchUserActivity"
-            />
-        <activity android:name=".auth.LoginActivity"/>
+        <activity android:name=".auth.LoginActivity" />
+
+        <activity android:name=".home.HomeScreenActivity"/>
         <activity android:name=".BaseActivity"/>
 
         <activity
-            android:name=".home.HomeScreenActivity"
+            android:name=".splashscreen.SplashActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.App.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

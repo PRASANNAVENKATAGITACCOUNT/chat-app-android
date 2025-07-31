@@ -1,5 +1,7 @@
 package com.project.chatapp.auth.screens
 
+import android.content.Intent
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -29,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -38,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.project.chatapp.R
+import com.project.chatapp.home.HomeScreenActivity
 import com.project.chatapp.ui.theme.DARK_GREEN
 import com.project.chatapp.ui.theme.LIGHT_BLUE
 
@@ -46,6 +50,9 @@ import com.project.chatapp.ui.theme.LIGHT_BLUE
 @Preview
 @Composable
 fun LoginScreen() {
+
+    val intent = Intent(LocalContext.current, HomeScreenActivity::class.java)
+    val context=LocalContext.current
 
     ConstraintLayout(
         modifier = Modifier.fillMaxSize()
@@ -68,54 +75,14 @@ fun LoginScreen() {
                 modifier = Modifier,
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(
-                    text = "Email",
-                    style = TextStyle(
-                        fontSize = 24.sp,
-                        color = Color.Gray,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    modifier = Modifier.padding(top = 8.dp, start = 5.dp)
-                )
-                TextField(
-                    value = "",
-                    onValueChange = {},
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                        .clip(RoundedCornerShape(58f)),
-                    colors = TextFieldDefaults.colors(
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        disabledIndicatorColor = Color.Transparent,
-                        errorIndicatorColor = Color.Transparent
-                    )
-                )
 
-                Text(
-                    text = "Password ",
-                    style = TextStyle(
-                        fontSize = 24.sp,
-                        color = Color.Gray,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    modifier = Modifier.padding(start = 5.dp)
-                )
-                TextField(
-                    value = "",
-                    onValueChange = {},
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                        .clip(RoundedCornerShape(58f)),
-                    colors = TextFieldDefaults.colors(
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        disabledIndicatorColor = Color.Transparent,
-                        errorIndicatorColor = Color.Transparent
-                    ),
+                InputFieldUI(title = "Email") {
+                    
+                }
 
-                    )
+                InputFieldUI(title = "Password") {
+
+                }
 
                 Text(
                     text = "Forgot Password?",
@@ -123,11 +90,14 @@ fun LoginScreen() {
                         .padding(top = 15.dp, end = 15.dp)
                         .align(Alignment.End)
                 )
-                Button(onClick = { },
+                Button(
+                    onClick = {
+                        context.startActivity(intent)
+                    },
                     modifier = Modifier
                         .width(300.dp)
-                        .height(70.dp)
-                        .padding(top = 15.dp)
+                        .height(60.dp)
+                        .padding(top = 8.dp)
                         .align(Alignment.CenterHorizontally)) {
                     Text(text = "Login")
                 }
@@ -136,43 +106,16 @@ fun LoginScreen() {
                         .padding(top = 15.dp)
                         .height(2.dp), color = Color.Gray)
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                 ) {
-                    Button(onClick = { },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Black,
-                            contentColor = Color.White),
-                        border = BorderStroke(width = 2.dp, color = Color.Gray),
-                        modifier = Modifier.width(120.dp).height(45.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().fillMaxHeight(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Image(painter = painterResource(id = R.drawable.google_icon),
-                                contentDescription = "", modifier = Modifier.size(25.dp).padding(5.dp))
-                            Text(text = "Google")
-                        }
+                    AuthUI(title = "Google", iconRes = R.drawable.google_icon){
 
                     }
-                    Button(onClick = { },
-                        colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Black,
-                        contentColor = Color.White),
-                        border = BorderStroke(width = 2.dp, color = Color.Gray),
-                        modifier = Modifier.width(140.dp).height(45.dp)) {
-                        Row (
-                            modifier = Modifier.fillMaxWidth().fillMaxHeight(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
-                        ){
-                            Image(painter = painterResource(id = R.drawable.facebook_icon),
-                                contentDescription = "",
-                                modifier = Modifier.size(25.dp).padding(5.dp))
-                            Text(text = "Facebook")
-                        }
+                    AuthUI(title = "Facebook", iconRes = R.drawable.facebook_icon){
+
                     }
                 }
 
@@ -182,13 +125,6 @@ fun LoginScreen() {
 
 
         }
-
-
-
-
-
-
-
 
     }
 

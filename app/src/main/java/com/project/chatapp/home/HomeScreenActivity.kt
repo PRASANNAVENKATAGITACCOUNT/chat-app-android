@@ -57,10 +57,10 @@ import kotlinx.coroutines.withContext
 
 class HomeScreenActivity : BaseActivity() {
 
-    private val splashScreenViewModel : SplashScreenViewModel by viewModels()
     private val homeScreenViewModel:HomeScreenViewModel by viewModels()
 
     val permissions  = arrayOf(android.Manifest.permission.READ_CONTACTS)
+
     private var requestPermissionLauncher : ActivityResultLauncher<String>
             =registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -77,12 +77,7 @@ class HomeScreenActivity : BaseActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
-        window.statusBarColor = ContextCompat.getColor(this,R.color.white)
-        splashScreen.setKeepOnScreenCondition {
-            splashScreenViewModel.isLoading.value
-        }
         setContent {
             ChatAppTheme {
                 Surface(
