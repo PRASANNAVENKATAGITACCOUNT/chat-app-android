@@ -1,4 +1,4 @@
-package com.project.chatapp.calls
+package com.project.chatapp.main_app.call_screen
 
 import androidx.compose.runtime.Composable
 

@@ -20,6 +20,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,6 +31,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.project.chatapp.R
@@ -64,7 +70,12 @@ fun AuthUI(title:String, iconRes:Int, onClick:()->Unit) {
 
 
 @Composable
-fun InputFieldUI(title:String, isPassword:Boolean=false, onValueListener: (String)->Unit) {
+fun InputFieldUI(title:String, value : String ,isPassword:Boolean=false, onValueListener: (String)->Unit) {
+
+    var passwordFieldHolder by remember {
+        mutableStateOf(PasswordFieldHolder())
+    }
+
     Column (
         horizontalAlignment = Alignment.CenterHorizontally
     ){
@@ -81,23 +92,37 @@ fun InputFieldUI(title:String, isPassword:Boolean=false, onValueListener: (Strin
                 .align(Alignment.Start)
         )
         TextField(
-            value = "",
-            onValueChange = {onValueListener(it)},
+            value = value,
+            onValueChange = { onValueListener(it) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 8.dp, end = 8.dp)
-                .clip(RoundedCornerShape(58f)),
+                .clip(RoundedCornerShape(58f))
+                ,
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
                 disabledIndicatorColor = Color.Transparent,
                 errorIndicatorColor = Color.Transparent
             ),
+            visualTransformation = passwordFieldHolder.visualType,
             trailingIcon = {
                 if(isPassword){
-                    IconButton(onClick = { /*TODO*/ }) {
+                    IconButton(onClick = {
+                        if(passwordFieldHolder.visualType == VisualTransformation.None){
+                            passwordFieldHolder = PasswordFieldHolder(
+                                visualType = PasswordVisualTransformation(),
+                                icon =R.drawable.eye_close_lock
+                            )
+                        }else{
+                            passwordFieldHolder = PasswordFieldHolder(
+                                visualType = VisualTransformation.None,
+                                icon =R.drawable.eye_open
+                            )
+                        }
+                    }) {
                         Icon(
-                            painterResource(id = R.drawable.eye_open),
+                            painterResource(id = passwordFieldHolder.icon),
                             contentDescription ="",
                             modifier = Modifier
                                 .height(21.dp)
@@ -109,5 +134,9 @@ fun InputFieldUI(title:String, isPassword:Boolean=false, onValueListener: (Strin
 
         )
     }
-
 }
+
+data class PasswordFieldHolder(
+    var visualType : VisualTransformation = VisualTransformation.None,
+    var icon : Int = R.drawable.eye_open
+    )

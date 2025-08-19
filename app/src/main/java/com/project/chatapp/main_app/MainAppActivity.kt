@@ -1,4 +1,4 @@
-package com.project.chatapp.home
+package com.project.chatapp.main_app
 
 import android.content.Context
 import android.content.pm.PackageManager
@@ -11,9 +11,13 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -22,6 +26,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -33,31 +38,25 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.project.chatapp.BaseActivity
-import com.project.chatapp.R
-import com.project.chatapp.auth.screens.LoginScreen
-import com.project.chatapp.calls.CallsScreen
-import com.project.chatapp.chats.ChatsScreen
-import com.project.chatapp.communities.CommunitiesScreen
+import com.project.chatapp.main_app.call_screen.CallsScreen
+import com.project.chatapp.main_app.chats_screens.ChatsScreen
+import com.project.chatapp.main_app.group_screen.GroupScreen
 import com.project.chatapp.model.Contact
-import com.project.chatapp.splashscreen.SplashScreenViewModel
 import com.project.chatapp.ui.theme.ChatAppTheme
-import com.project.chatapp.updates.UpdatesScreen
-import kotlinx.coroutines.CoroutineScope
+import com.project.chatapp.main_app.status_screen.UpdatesScreen
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class HomeScreenActivity : BaseActivity() {
 
-    private val homeScreenViewModel:HomeScreenViewModel by viewModels()
+    private val mainAppViewModel:MainAppViewModel by viewModels()
 
     val permissions  = arrayOf(android.Manifest.permission.READ_CONTACTS)
 
@@ -70,7 +69,7 @@ class HomeScreenActivity : BaseActivity() {
         }else{
             lifecycleScope.launch {
                 val contacts = getAllContacts(this@HomeScreenActivity)
-                homeScreenViewModel.setListOfContacts(contacts)
+                mainAppViewModel.setListOfContacts(contacts)
             }
 
         }
@@ -84,7 +83,7 @@ class HomeScreenActivity : BaseActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    HomeScreen(homeScreenViewModel,permissionGranted()) {
+                    HomeScreen(mainAppViewModel,permissionGranted()) {
                         if (!permissionGranted()) {
                             checkRequiredPermission()
                         }
@@ -112,27 +111,28 @@ class HomeScreenActivity : BaseActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(homeScreenViewModel:HomeScreenViewModel,isPermissionGranted:Boolean, askPermission:()->Unit) {
+fun HomeScreen(mainAppViewModel:MainAppViewModel, isPermissionGranted:Boolean, askPermission:()->Unit) {
     askPermission()
     val context= LocalContext.current
     LaunchedEffect(isPermissionGranted) {
-        if(isPermissionGranted && homeScreenViewModel.listOfContacts.value.isEmpty()) {
-            homeScreenViewModel.setListOfContacts(getAllContacts(context))
-            Log.d("nfvgj","${homeScreenViewModel.listOfContacts.value}")
+        if(isPermissionGranted && mainAppViewModel.listOfContacts.value.isEmpty()) {
+            mainAppViewModel.setListOfContacts(getAllContacts(context))
+            Log.d("nfvgj","${mainAppViewModel.listOfContacts.value}")
         }
     }
 
     val navController = rememberNavController()
     Scaffold (
-        bottomBar = { HomeScreenBottomNav(navController) }
+        bottomBar = { HomeScreenBottomNav(navController) },
+        modifier = Modifier
     ){
         Column(
             modifier = Modifier.padding(it)
         ) {
             NavHost(navController = navController, startDestination = BottomNavItems.ChatsScreen.route) {
-                composable(BottomNavItems.ChatsScreen.route) {ChatsScreen(homeScreenViewModel.listOfContacts)}
+                composable(BottomNavItems.ChatsScreen.route) {ChatsScreen(mainAppViewModel.listOfContacts)}
                 composable(BottomNavItems.UpdatesScreen.route) {UpdatesScreen()}
-                composable(BottomNavItems.CommunitiesScreen.route) {CommunitiesScreen() }
+                composable(BottomNavItems.CommunitiesScreen.route) {GroupScreen() }
                 composable(BottomNavItems.CallsScreen.route) { CallsScreen()}
             }
         }

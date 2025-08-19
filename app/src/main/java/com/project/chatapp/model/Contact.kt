@@ -1,10 +1,7 @@
 package com.project.chatapp.model
 
 import android.net.Uri
-import android.os.Parcelable
 import java.io.Serializable
-import java.time.Clock
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 

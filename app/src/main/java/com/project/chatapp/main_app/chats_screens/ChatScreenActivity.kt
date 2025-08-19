@@ -1,15 +1,10 @@
-package com.project.chatapp.chats
+package com.project.chatapp.main_app.chats_screens
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
-import androidx.compose.ui.platform.LocalContext
 import com.project.chatapp.BaseActivity
-import com.project.chatapp.chats.constants.CONTACT_SELECTED
+import com.project.chatapp.main_app.chats_screens.constants.CONTACT_SELECTED
 import com.project.chatapp.model.Contact
-import com.project.chatapp.model.Message
-import com.project.chatapp.model.MessageSentOrReceived
 import com.project.chatapp.ui.theme.ChatAppTheme
 
 class ChatScreenActivity:BaseActivity() {

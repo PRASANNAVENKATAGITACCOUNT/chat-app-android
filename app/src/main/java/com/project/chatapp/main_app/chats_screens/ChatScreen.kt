@@ -1,14 +1,18 @@
-package com.project.chatapp.chats
+package com.project.chatapp.main_app.chats_screens
 
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -67,12 +71,15 @@ fun ChatScreen(contact:Contact=Contact(), createMessage:(Message)->Unit={}) {
     }
 
     Scaffold (
-        topBar = {ChatTopAppBar(contact)},
+        topBar = {
+            ChatTopAppBar(contact)
+                 },
         bottomBar = {BottomChatAppBar{chatText->
             val message = Message(message = chatText)
             listOfMessages.add(message)
             createMessage(message)
-        } }
+        } },
+        modifier = Modifier.padding(WindowInsets.systemBars.asPaddingValues())
     ){
         Column (
             modifier = Modifier
@@ -177,7 +184,6 @@ fun ChatTopAppBar(contact: Contact= Contact(name = "dummy")) {
             },
             navigationIcon = { IconButton(onClick = {  }) {
                 Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "")
-
             }}
         )
     }

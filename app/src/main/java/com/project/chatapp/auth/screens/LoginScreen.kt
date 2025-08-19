@@ -5,6 +5,7 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,6 +28,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,7 +46,7 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.project.chatapp.R
-import com.project.chatapp.home.HomeScreenActivity
+import com.project.chatapp.main_app.HomeScreenActivity
 import com.project.chatapp.ui.theme.DARK_GREEN
 import com.project.chatapp.ui.theme.LIGHT_BLUE
 
@@ -75,13 +80,20 @@ fun LoginScreen() {
                 modifier = Modifier,
                 verticalArrangement = Arrangement.Center
             ) {
-
-                InputFieldUI(title = "Email") {
-                    
+                var email by remember {
+                    mutableStateOf("")
                 }
 
-                InputFieldUI(title = "Password") {
+                var password by remember {
+                    mutableStateOf("")
+                }
 
+                InputFieldUI(title = "Email", value = email) {
+                    email=it
+                }
+
+                InputFieldUI(title = "Password", isPassword = true, value = password) {
+                    password=it
                 }
 
                 Text(

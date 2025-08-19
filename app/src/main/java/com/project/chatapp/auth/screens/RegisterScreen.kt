@@ -23,6 +23,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -62,21 +66,40 @@ fun RegisterScreen() {
                 modifier = Modifier,
                 verticalArrangement = Arrangement.Center
             ) {
-
-                InputFieldUI(title = "Email") {
-
+                var userData by remember {
+                    mutableStateOf(UserForm())
                 }
 
-                InputFieldUI(title = "Confirm Email") {
-
+                InputFieldUI(title = "Email", value = userData.email) {
+                    userData = UserForm(
+                        email = it,
+                        password = userData.password,
+                        conformEmail = userData.conformEmail,
+                        confirmPassword = userData.confirmPassword)
                 }
 
-                InputFieldUI(title = "Password",isPassword = true){
-
+                InputFieldUI(title = "Confirm Email", value = userData.conformEmail) {
+                    userData = UserForm(
+                        email = userData.email,
+                        password = userData.password,
+                        conformEmail = it,
+                        confirmPassword = userData.confirmPassword)
                 }
 
-                InputFieldUI(title = "Confirm Password",isPassword = true) {
+                InputFieldUI(title = "Password",isPassword = true, value = userData.password){
+                    userData = UserForm(
+                        email = userData.email,
+                        conformEmail = userData.conformEmail,
+                        confirmPassword = userData.confirmPassword,
+                        password = it)
+                }
 
+                InputFieldUI(title = "Confirm Password",isPassword = true, value= userData.confirmPassword) {
+                    userData = UserForm(
+                        email = userData.email,
+                        conformEmail = userData.conformEmail,
+                        confirmPassword = it,
+                        password = userData.password)
                 }
 
                 Text(
@@ -120,4 +143,12 @@ fun RegisterScreen() {
 
     }
 }
+
+
+data class UserForm(
+    var email : String="",
+    var password : String="",
+    var conformEmail: String="",
+    var confirmPassword: String=""
+)
 

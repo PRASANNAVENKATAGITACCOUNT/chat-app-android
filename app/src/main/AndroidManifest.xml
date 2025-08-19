@@ -9,21 +9,21 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@drawable/app_icon"
-        android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
+        android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.ChatApp"
         tools:targetApi="31">
 
         <activity
-            android:name=".chats.ChatScreenActivity"
+            android:name=".main_app.chats_screens.ChatScreenActivity"
             android:windowSoftInputMode="adjustResize"
             />
 
         <activity android:name=".auth.LoginActivity" />
 
-        <activity android:name=".home.HomeScreenActivity"/>
+        <activity android:name=".main_app.HomeScreenActivity"/>
         <activity android:name=".BaseActivity"/>
 
         <activity

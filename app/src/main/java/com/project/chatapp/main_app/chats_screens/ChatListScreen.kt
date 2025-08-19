@@ -1,9 +1,10 @@
-package com.project.chatapp.chats
+package com.project.chatapp.main_app.chats_screens
 
 
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -44,8 +45,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.project.chatapp.chats.constants.CONTACT_SELECTED
-import com.project.chatapp.home.HomeScreenActivity
+import com.project.chatapp.main_app.chats_screens.constants.CONTACT_SELECTED
 import com.project.chatapp.model.Contact
 import com.project.chatapp.ui.theme.DARK_GREEN
 import kotlinx.coroutines.flow.StateFlow
@@ -57,51 +57,54 @@ fun ChatsScreen(contacts:StateFlow<List<Contact>>) {
     val context = LocalContext.current
     Log.d("nfjnwf","$listOfContacts")
 
+
     var queryText by remember {
         mutableStateOf("")
     }
-    Scaffold(
-        topBar = { if(queryText.isEmpty()){ ChatsScreenTopBar()} }
+    Column(
+        modifier = Modifier
     ) {
-        Column(
-            modifier = Modifier.padding(it)
-        ) {
-            TextField(
-                value = queryText,
-                onValueChange = { queryText = it },
-                placeholder = { Text("Search...") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                shape = RoundedCornerShape(30.dp),
-                colors = TextFieldDefaults.colors(
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent
-                ),
-                leadingIcon = {
-                    if (queryText.isNotEmpty()) {
-                        IconButton(onClick = { }) {
-                            Icon(
-                                imageVector = Icons.Filled.ArrowBack,
-                                contentDescription = ""
-                            )
-                        }
-                    }
-                }
-            )
+        if(queryText.isEmpty()){
+            ChatsScreenTopBar()
+        }
 
-            LazyColumn(modifier = Modifier.padding(8.dp)) {
-                items(listOfContacts){contact->
-                    ChatContact(contact){contact->
-                        val intent = Intent(context,ChatScreenActivity::class.java)
-                        intent.putExtra(CONTACT_SELECTED, contact)
-                        context.startActivity(intent)
+        TextField(
+            value = queryText,
+            onValueChange = { queryText = it },
+            placeholder = { Text("Search...") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            shape = RoundedCornerShape(30.dp),
+            colors = TextFieldDefaults.colors(
+                unfocusedIndicatorColor = Color.Transparent,
+                focusedIndicatorColor = Color.Transparent,
+                disabledIndicatorColor = Color.Transparent
+            ),
+            leadingIcon = {
+                if (queryText.isNotEmpty()) {
+                    IconButton(onClick = {
+                        queryText = ""
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowBack,
+                            contentDescription = ""
+                        )
                     }
                 }
             }
+        )
 
+        LazyColumn(modifier = Modifier.padding(8.dp)) {
+            items(listOfContacts) { contact ->
+                ChatContact(contact) { contact ->
+                    val intent = Intent(context, ChatScreenActivity::class.java)
+                    intent.putExtra(CONTACT_SELECTED, contact)
+                    context.startActivity(intent)
+                }
+            }
         }
+
     }
 }
 
@@ -153,14 +156,14 @@ fun ChatContact(contact: Contact= Contact(name = "dummy"),onClickContact:(Contac
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatsScreenTopBar() {
-    TopAppBar(
-        title = {
-            Text(
-                text = "Chat App", style = TextStyle(
-                    color = DARK_GREEN,
-                    fontSize = 30.sp, fontWeight = FontWeight.Bold
-                )
+    Row(
+        modifier = Modifier.padding(start = 15.dp, end = 8.dp, top = 5.dp, bottom = 5.dp)
+    ) {
+        Text(
+            text = "Chat App", style = TextStyle(
+                color = DARK_GREEN,
+                fontSize = 30.sp, fontWeight = FontWeight.Bold
             )
-        },
         )
+    }
 }

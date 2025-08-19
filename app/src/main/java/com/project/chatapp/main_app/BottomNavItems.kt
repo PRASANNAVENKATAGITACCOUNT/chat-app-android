@@ -1,11 +1,11 @@
-package com.project.chatapp.home
+package com.project.chatapp.main_app
 
 import com.project.chatapp.R
 
 sealed class BottomNavItems (val route: String, val iconRes: Int, val label: String){
     object ChatsScreen:BottomNavItems("chats", R.drawable.chats,"Chats")
-    object UpdatesScreen:BottomNavItems("updates", R.drawable.status_chat_icon,"Updates")
-    object CommunitiesScreen:BottomNavItems("updates", R.drawable.communities_icon,"Communities")
+    object UpdatesScreen:BottomNavItems("status", R.drawable.status_chat_icon,"Status")
+    object CommunitiesScreen:BottomNavItems("groups", R.drawable.communities_icon,"Groups")
     object CallsScreen:BottomNavItems("calls", R.drawable.call_icon,"Calls")
 
     companion object{
