@@ -11,13 +11,9 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -26,7 +22,6 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -44,19 +39,18 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.project.chatapp.BaseActivity
-import com.project.chatapp.main_app.call_screen.CallsScreen
 import com.project.chatapp.main_app.chats_screens.ChatsScreen
-import com.project.chatapp.main_app.group_screen.GroupScreen
-import com.project.chatapp.model.Contact
+import com.project.chatapp.model.User
 import com.project.chatapp.ui.theme.ChatAppTheme
 import com.project.chatapp.main_app.status_screen.UpdatesScreen
+import com.project.chatapp.main_app.viewmodels.MainAppViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class HomeScreenActivity : BaseActivity() {
 
-    private val mainAppViewModel:MainAppViewModel by viewModels()
+    private val mainAppViewModel: MainAppViewModel by viewModels()
 
     val permissions  = arrayOf(android.Manifest.permission.READ_CONTACTS)
 
@@ -111,7 +105,7 @@ class HomeScreenActivity : BaseActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(mainAppViewModel:MainAppViewModel, isPermissionGranted:Boolean, askPermission:()->Unit) {
+fun HomeScreen(mainAppViewModel: MainAppViewModel, isPermissionGranted:Boolean, askPermission:()->Unit) {
     askPermission()
     val context= LocalContext.current
     LaunchedEffect(isPermissionGranted) {
@@ -130,20 +124,18 @@ fun HomeScreen(mainAppViewModel:MainAppViewModel, isPermissionGranted:Boolean, a
             modifier = Modifier.padding(it)
         ) {
             NavHost(navController = navController, startDestination = BottomNavItems.ChatsScreen.route) {
-                composable(BottomNavItems.ChatsScreen.route) {ChatsScreen(mainAppViewModel.listOfContacts)}
+                composable(BottomNavItems.ChatsScreen.route) {ChatsScreen()}
                 composable(BottomNavItems.UpdatesScreen.route) {UpdatesScreen()}
-                composable(BottomNavItems.CommunitiesScreen.route) {GroupScreen() }
-                composable(BottomNavItems.CallsScreen.route) { CallsScreen()}
             }
         }
     }
 
 }
 
-private suspend fun getAllContacts(context: Context) :List<Contact> {
+private suspend fun getAllContacts(context: Context) :List<User> {
 
     return withContext(Dispatchers.IO){
-        val listOfUserContacts = mutableListOf<Contact>()
+        val listOfUserUsers = mutableListOf<User>()
         val contentResolver = context.contentResolver
         val contactCursor = contentResolver.query(
             ContactsContract.Contacts.CONTENT_URI,
@@ -151,13 +143,13 @@ private suspend fun getAllContacts(context: Context) :List<Contact> {
         )
         contactCursor?.let {
             while (it.moveToNext()) {
-                val contact = Contact()
+                val user = User()
                 val id = it.getString(it.getColumnIndexOrThrow(ContactsContract.Contacts._ID))
-                contact.id = id.toLong()
+                user.contactId= id.toLong()
                 val name =
                     it.getString(it.getColumnIndexOrThrow(ContactsContract.Contacts.DISPLAY_NAME))
                 name?.let {
-                    contact.name=it;
+                    user.username=it;
                 }
                 val hasPhoneNumber =
                     it.getInt(it.getColumnIndexOrThrow(ContactsContract.Contacts.HAS_PHONE_NUMBER))
@@ -175,22 +167,22 @@ private suspend fun getAllContacts(context: Context) :List<Contact> {
                                 pCursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NUMBER)
                             )
                             number?.let {
-                                contact.phoneNumber = it
+                                user.phoneNumber = it
                             }
                             val photoIndex = pCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.PHOTO_URI)
                             val photoUriIndex = pCursor.getString(photoIndex)
                             val photoUri =photoUriIndex?.let { Uri.parse(it) }
                             photoUri?.let { photouri->
-                                contact.setContactPhotoUri(photouri)
+                                user.setContactPhotoUri(photouri)
                             }
                         }
 
                     }
                 }
-                listOfUserContacts.add(contact)
+                listOfUserUsers.add(user)
             }
         }
-        listOfUserContacts
+        listOfUserUsers
     }
 }
 

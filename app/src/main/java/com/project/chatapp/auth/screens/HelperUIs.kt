@@ -1,5 +1,8 @@
 package com.project.chatapp.auth.screens
 
+import android.R.attr.autofillHints
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -12,10 +15,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -26,11 +31,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentType
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -68,17 +78,23 @@ fun AuthUI(title:String, iconRes:Int, onClick:()->Unit) {
 
 
 
-
 @Composable
-fun InputFieldUI(title:String, value : String ,isPassword:Boolean=false, onValueListener: (String)->Unit) {
-
+fun InputFieldUI(
+    title: String,
+    value: String,
+    isPassword: Boolean = false,
+    passwordType: PASSWORD_TYPE= PASSWORD_TYPE.CURRENT_PASSWORD,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    imeAction: ImeAction = ImeAction.Next,
+    onValueListener: (String) -> Unit
+) {
     var passwordFieldHolder by remember {
         mutableStateOf(PasswordFieldHolder())
     }
 
-    Column (
+    Column(
         horizontalAlignment = Alignment.CenterHorizontally
-    ){
+    ) {
         Text(
             text = title,
             style = TextStyle(
@@ -91,6 +107,7 @@ fun InputFieldUI(title:String, value : String ,isPassword:Boolean=false, onValue
                 .height(25.dp)
                 .align(Alignment.Start)
         )
+
         TextField(
             value = value,
             onValueChange = { onValueListener(it) },
@@ -98,32 +115,59 @@ fun InputFieldUI(title:String, value : String ,isPassword:Boolean=false, onValue
                 .fillMaxWidth()
                 .padding(start = 8.dp, end = 8.dp)
                 .clip(RoundedCornerShape(58f))
-                ,
+                // Add autofill hints
+                .semantics {
+                    if (isPassword) {
+                        contentType = when(passwordType){
+                            PASSWORD_TYPE.NEW_PASSWORD -> ContentType.NewPassword
+                            PASSWORD_TYPE.CONFIRM_PASSWORD -> ContentType.Password
+                            PASSWORD_TYPE.CURRENT_PASSWORD -> ContentType.Password
+                        }
+                    } else {
+                        contentType = ContentType.EmailAddress
+                    }
+                },
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
                 disabledIndicatorColor = Color.Transparent,
                 errorIndicatorColor = Color.Transparent
             ),
-            visualTransformation = passwordFieldHolder.visualType,
+            visualTransformation = if (isPassword) passwordFieldHolder.visualType else VisualTransformation.None,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = if (isPassword) KeyboardType.Password
+                else keyboardType,
+                imeAction = imeAction,
+                autoCorrect = !isPassword
+            ),
+            singleLine = true,
+            leadingIcon = {
+                if (!isPassword) {
+                    Icon(
+                        painter = painterResource(R.drawable.email_icon),
+                        contentDescription = "Email"
+                    )
+                }
+            },
             trailingIcon = {
-                if(isPassword){
+                if (isPassword) {
                     IconButton(onClick = {
-                        if(passwordFieldHolder.visualType == VisualTransformation.None){
-                            passwordFieldHolder = PasswordFieldHolder(
+                        passwordFieldHolder = if (passwordFieldHolder.visualType == VisualTransformation.None) {
+                            PasswordFieldHolder(
                                 visualType = PasswordVisualTransformation(),
-                                icon =R.drawable.eye_close_lock
+                                icon = R.drawable.eye_close_lock
                             )
-                        }else{
-                            passwordFieldHolder = PasswordFieldHolder(
+                        } else {
+                            PasswordFieldHolder(
                                 visualType = VisualTransformation.None,
-                                icon =R.drawable.eye_open
+                                icon = R.drawable.eye_open
                             )
                         }
                     }) {
                         Icon(
                             painterResource(id = passwordFieldHolder.icon),
-                            contentDescription ="",
+                            contentDescription = if (passwordFieldHolder.visualType == VisualTransformation.None)
+                                "Hide password" else "Show password",
                             modifier = Modifier
                                 .height(21.dp)
                                 .width(21.dp)
@@ -131,7 +175,6 @@ fun InputFieldUI(title:String, value : String ,isPassword:Boolean=false, onValue
                     }
                 }
             }
-
         )
     }
 }
@@ -140,3 +183,9 @@ data class PasswordFieldHolder(
     var visualType : VisualTransformation = VisualTransformation.None,
     var icon : Int = R.drawable.eye_open
     )
+
+enum class PASSWORD_TYPE{
+    NEW_PASSWORD,
+    CURRENT_PASSWORD,
+    CONFIRM_PASSWORD
+}

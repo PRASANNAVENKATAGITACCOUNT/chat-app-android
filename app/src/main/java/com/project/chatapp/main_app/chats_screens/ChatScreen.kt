@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -53,29 +52,28 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.project.chatapp.R
-import com.project.chatapp.model.Contact
+import com.project.chatapp.model.User
 import com.project.chatapp.model.Message
-import com.project.chatapp.model.MessageSentOrReceived
 
 
 @Preview
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatScreen(contact:Contact=Contact(), createMessage:(Message)->Unit={}) {
+fun ChatScreen(user:User=User(), createMessage:(Message)->Unit={}) {
 
     val listOfMessages = remember {
         mutableStateListOf<Message>(
-            Message(sentOrReceiver = MessageSentOrReceived.RECEIVED, message = "Hello World"),
-            Message(message = "Hello World 2")
+            Message( content = "Hello World"),
+            Message(content = "Hello World 2")
         )
     }
 
     Scaffold (
         topBar = {
-            ChatTopAppBar(contact)
+            ChatTopAppBar(user)
                  },
         bottomBar = {BottomChatAppBar{chatText->
-            val message = Message(message = chatText)
+            val message = Message(content = chatText)
             listOfMessages.add(message)
             createMessage(message)
         } },
@@ -91,8 +89,8 @@ fun ChatScreen(contact:Contact=Contact(), createMessage:(Message)->Unit={}) {
                     .fillMaxSize()
                     .padding(5.dp)
             ) {
-                items(listOfMessages){message->
-                    Chat(message)
+                items(emptyList<Message>()){ message->
+                    Chat(user.uid,message)
                 }
             }
         }
@@ -102,13 +100,13 @@ fun ChatScreen(contact:Contact=Contact(), createMessage:(Message)->Unit={}) {
 
 
 @Composable
-fun Chat(message: Message=Message(message = "Hello ")) {
+fun Chat(uid: String, message: Message=Message(content = "Hello ")) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
             .padding(2.dp),
-        horizontalAlignment = if(message.sentOrReceiver==MessageSentOrReceived.SENT){
+        horizontalAlignment = if(message.senderId!= uid){
             Alignment.End
         }else{
             Alignment.Start
@@ -117,14 +115,14 @@ fun Chat(message: Message=Message(message = "Hello ")) {
      {
         Card(
             modifier = Modifier,
-            shape = if(message.sentOrReceiver==MessageSentOrReceived.SENT){
+            shape = if(message.senderId!= uid){
                 RoundedCornerShape(bottomEnd = 0f, bottomStart = 15f, topStart = 15f, topEnd = 15f)
             }else{
                 RoundedCornerShape(bottomEnd = 15f, bottomStart = 0f, topStart = 15f, topEnd = 15f)
             }
         ) {
             Text(
-                text = message.message,
+                text = message.content,
                 style = TextStyle(
                     color = Color.White,
                     fontWeight = FontWeight.Normal,
@@ -133,7 +131,7 @@ fun Chat(message: Message=Message(message = "Hello ")) {
                 modifier = Modifier
                     .wrapContentWidth()
                     .background(
-                        color = if (message.sentOrReceiver == MessageSentOrReceived.SENT) {
+                        color = if (message.senderId!= uid) {
                             Color.Blue
                         } else {
                             Color.Green
@@ -149,7 +147,7 @@ fun Chat(message: Message=Message(message = "Hello ")) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatTopAppBar(contact: Contact= Contact(name = "dummy")) {
+fun ChatTopAppBar(user: User= User(username = "dummy")) {
     Surface (shadowElevation = 8.dp){
         TopAppBar(
             title = {
@@ -159,7 +157,7 @@ fun ChatTopAppBar(contact: Contact= Contact(name = "dummy")) {
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     AsyncImage(
-                        model = contact.getContactPhotoUri()?:Uri.EMPTY,
+                        model = user.getContactPhotoUri()?:Uri.EMPTY,
                         contentDescription = "",
                         modifier = Modifier
                             .width(45.dp)
@@ -168,7 +166,7 @@ fun ChatTopAppBar(contact: Contact= Contact(name = "dummy")) {
                     Column (
                         modifier = Modifier.padding(start = 5.dp)
                     ){
-                        Text(text = if (contact.name.isEmpty()) contact.phoneNumber else contact.name, style = TextStyle(fontSize = 15.sp))
+                        Text(text = if (user.username.isEmpty()) user.phoneNumber else user.username, style = TextStyle(fontSize = 15.sp))
                         Text(text = "Last Screen Todayat 8:23 pm", style = TextStyle(fontSize = 8.sp))
                     }
                     IconButton(onClick = { }) {

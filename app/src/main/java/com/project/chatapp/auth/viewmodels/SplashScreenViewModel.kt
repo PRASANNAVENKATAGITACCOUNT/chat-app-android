@@ -1,8 +1,8 @@
-package com.project.chatapp.splashscreen
+package com.project.chatapp.auth.viewmodels
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.project.chatapp.auth.services.impl.FirebaseAuthImpl
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,10 +13,17 @@ class SplashScreenViewModel : ViewModel() {
     private val mutableStateFlow = MutableStateFlow(true)
     val isLoading = mutableStateFlow.asStateFlow()
 
+    val authenticationService = FirebaseAuthImpl()
+
     init {
         viewModelScope.launch {
-            delay(1000)
+            delay(300)
             mutableStateFlow.value = false
         }
     }
+
+    fun isUserPresent() : Boolean = authenticationService.hasUser()
+
+
+
 }

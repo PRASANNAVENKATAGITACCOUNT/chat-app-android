@@ -1,11 +1,11 @@
 package com.project.chatapp.auth.services.impl
 
 import com.google.firebase.Firebase
+import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.auth
 import com.project.chatapp.auth.services.AuthenticationService
-import com.project.chatapp.model.User
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -23,15 +23,17 @@ class FirebaseAuthImpl: AuthenticationService {
             awaitClose { Firebase.auth.removeAuthStateListener(listener) }
         }
 
+
     override val currentUserId: String
         get() = Firebase.auth.currentUser?.uid.orEmpty()
 
-    override suspend fun signIn(email: String, password: String) {
-        Firebase.auth.signInWithEmailAndPassword(email,password).await()
+    override suspend fun signIn(email: String, password: String) : AuthResult {
+        val authResult = Firebase.auth.signInWithEmailAndPassword(email,password).await()
+        return authResult
     }
 
-    override suspend fun signUp(email: String, password: String) {
-        Firebase.auth.createUserWithEmailAndPassword(email,password).await()
+    override suspend fun signUp(email: String, password: String) : AuthResult {
+        return  Firebase.auth.createUserWithEmailAndPassword(email,password).await()
     }
 
     override fun hasUser(): Boolean {

@@ -1,11 +1,7 @@
 package com.project.chatapp.auth.screens
 
 import android.content.Intent
-import androidx.annotation.DrawableRes
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,19 +10,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,30 +24,33 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.firebase.auth.FirebaseAuthException
 import com.project.chatapp.R
+import com.project.chatapp.auth.viewmodels.LoginViewModel
 import com.project.chatapp.main_app.HomeScreenActivity
-import com.project.chatapp.ui.theme.DARK_GREEN
-import com.project.chatapp.ui.theme.LIGHT_BLUE
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
-fun LoginScreen() {
+fun LoginScreen(loginViewModel: LoginViewModel = viewModel<LoginViewModel>()) {
 
     val intent = Intent(LocalContext.current, HomeScreenActivity::class.java)
     val context=LocalContext.current
+
 
     ConstraintLayout(
         modifier = Modifier.fillMaxSize()
@@ -80,21 +73,30 @@ fun LoginScreen() {
                 modifier = Modifier,
                 verticalArrangement = Arrangement.Center
             ) {
-                var email by remember {
+                var userEmail by remember {
                     mutableStateOf("")
                 }
-
-                var password by remember {
+                var userPassword by remember {
                     mutableStateOf("")
                 }
+                InputFieldUI(
+                    "Email",
+                    value = userEmail,
+                    onValueListener = {
+                        userEmail = it
+                    },
+                    isPassword = false,
+                )
+                InputFieldUI(
+                    "Password",
+                    value = userPassword,
+                    onValueListener = {
+                        userPassword = it
+                    },
+                    isPassword = true,
+                    passwordType = PASSWORD_TYPE.CURRENT_PASSWORD
+                )
 
-                InputFieldUI(title = "Email", value = email) {
-                    email=it
-                }
-
-                InputFieldUI(title = "Password", isPassword = true, value = password) {
-                    password=it
-                }
 
                 Text(
                     text = "Forgot Password?",
@@ -104,7 +106,18 @@ fun LoginScreen() {
                 )
                 Button(
                     onClick = {
-                        context.startActivity(intent)
+                        loginViewModel.launchCatching {
+                            try {
+                                val authResult= loginViewModel.signInUser(userEmail, userPassword)
+                                authResult.let {
+                                    if(it.user!=null){
+                                        context.startActivity(intent)
+                                    }
+                                }
+                            }catch (e: FirebaseAuthException){
+                                Log.d(LoginViewModel.TAG, "LoginScreen : $e")
+                            }
+                        }
                     },
                     modifier = Modifier
                         .width(300.dp)

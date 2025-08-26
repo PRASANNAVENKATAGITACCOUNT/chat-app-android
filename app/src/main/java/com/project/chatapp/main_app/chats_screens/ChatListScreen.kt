@@ -4,7 +4,6 @@ package com.project.chatapp.main_app.chats_screens
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -24,11 +23,9 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -44,19 +41,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.project.chatapp.main_app.chats_screens.constants.CONTACT_SELECTED
-import com.project.chatapp.model.Contact
+import com.project.chatapp.main_app.viewmodels.MainAppViewModel
+import com.project.chatapp.model.User
 import com.project.chatapp.ui.theme.DARK_GREEN
 import kotlinx.coroutines.flow.StateFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatsScreen(contacts:StateFlow<List<Contact>>) {
-    val listOfContacts by contacts.collectAsState()
+fun ChatsScreen(mainAppViewModel: MainAppViewModel = viewModel()) {
+    val listOfContacts by mainAppViewModel.listOfContacts.collectAsState()
     val context = LocalContext.current
     Log.d("nfjnwf","$listOfContacts")
-
 
     var queryText by remember {
         mutableStateOf("")
@@ -110,17 +108,17 @@ fun ChatsScreen(contacts:StateFlow<List<Contact>>) {
 
 @Preview
 @Composable
-fun ChatContact(contact: Contact= Contact(name = "dummy"),onClickContact:(Contact)->Unit={}) {
+fun ChatContact(user: User= User(username = "dummy"), onClickContact:(User)->Unit={}) {
     Row (
         Modifier
             .fillMaxWidth()
             .height(65.dp)
             .padding(10.dp)
             .clickable {
-                onClickContact(contact)
+                onClickContact(user)
             }
     ) {
-         when(contact.getContactPhotoUri()){
+         when(user.getContactPhotoUri()){
              null->Image(
                  imageVector = Icons.Filled.AccountCircle,
                  contentDescription = "",modifier = Modifier
@@ -129,7 +127,7 @@ fun ChatContact(contact: Contact= Contact(name = "dummy"),onClickContact:(Contac
                      .height(45.dp))
              is Uri->{
                  AsyncImage(
-                     model = contact.getContactPhotoUri(),
+                     model = user.getContactPhotoUri(),
                      contentDescription = "",
                      modifier = Modifier
                          .clip(CircleShape)
@@ -142,8 +140,8 @@ fun ChatContact(contact: Contact= Contact(name = "dummy"),onClickContact:(Contac
             Modifier.fillMaxSize()
         ) {
             val userData =
-                if(contact.name.isNotEmpty()) {contact.name}
-                else if(contact.phoneNumber.isNotEmpty()){contact.phoneNumber}
+                if(user.username.isNotEmpty()) {user.username}
+                else if(user.phoneNumber.isNotEmpty()){user.phoneNumber}
                 else ""
             Text(text =userData, style = TextStyle(fontWeight = FontWeight.Bold), modifier =  Modifier.padding(start = 5.dp))
             Text(text = "..",modifier =  Modifier.padding(start = 5.dp))

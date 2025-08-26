@@ -1,5 +1,7 @@
 package com.project.chatapp.auth.screens
 
+import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -31,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -38,12 +41,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.firebase.auth.FirebaseAuthException
 import com.project.chatapp.R
+import com.project.chatapp.auth.viewmodels.LoginViewModel
+import com.project.chatapp.main_app.HomeScreenActivity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 @Preview
 @Composable
-fun RegisterScreen() {
+fun RegisterScreen(loginViewModel: LoginViewModel = viewModel<LoginViewModel>()) {
 
     ConstraintLayout(
         modifier = Modifier.fillMaxSize()
@@ -66,6 +76,9 @@ fun RegisterScreen() {
                 modifier = Modifier,
                 verticalArrangement = Arrangement.Center
             ) {
+                val intent = Intent(LocalContext.current, HomeScreenActivity::class.java)
+                val context=LocalContext.current
+
                 var userData by remember {
                     mutableStateOf(UserForm())
                 }
@@ -78,15 +91,8 @@ fun RegisterScreen() {
                         confirmPassword = userData.confirmPassword)
                 }
 
-                InputFieldUI(title = "Confirm Email", value = userData.conformEmail) {
-                    userData = UserForm(
-                        email = userData.email,
-                        password = userData.password,
-                        conformEmail = it,
-                        confirmPassword = userData.confirmPassword)
-                }
 
-                InputFieldUI(title = "Password",isPassword = true, value = userData.password){
+                InputFieldUI(title = "Password",isPassword = true, value = userData.password, passwordType = PASSWORD_TYPE.NEW_PASSWORD){
                     userData = UserForm(
                         email = userData.email,
                         conformEmail = userData.conformEmail,
@@ -94,7 +100,7 @@ fun RegisterScreen() {
                         password = it)
                 }
 
-                InputFieldUI(title = "Confirm Password",isPassword = true, value= userData.confirmPassword) {
+                InputFieldUI(title = "Confirm Password",isPassword = true, value= userData.confirmPassword, passwordType = PASSWORD_TYPE.CONFIRM_PASSWORD) {
                     userData = UserForm(
                         email = userData.email,
                         conformEmail = userData.conformEmail,
@@ -102,19 +108,36 @@ fun RegisterScreen() {
                         password = userData.password)
                 }
 
-                Text(
-                    text = "Forgot Password?",
-                    modifier = Modifier
-                        .padding(top = 15.dp, end = 15.dp)
-                        .align(Alignment.End)
-                )
-                Button(onClick = { },
+                Button(onClick = {
+                    if(userData.hasValidCredentials()){
+                        loginViewModel.launchCatching {
+                            try {
+                                val authResult = loginViewModel.signUpUser(
+                                    email = userData.email,
+                                    password = userData.password
+                                )
+                                authResult.let {
+                                    if(it.user!=null){
+                                        context.startActivity(intent)
+                                        Log.d(LoginViewModel.TAG, "RegisterScreen: User created and authenticated")
+                                    }else{
+                                        Log.d(LoginViewModel.TAG, "RegisterScreen: User not created")
+                                    }
+                                }
+
+                            }catch (e: FirebaseAuthException){
+                                Log.d(LoginViewModel.TAG, "RegisterScreen: ${e.message}")
+                            }
+                        }
+                    }
+
+                },
                     modifier = Modifier
                         .width(300.dp)
                         .height(60.dp)
                         .padding(top = 8.dp)
                         .align(Alignment.CenterHorizontally)) {
-                    Text(text = "Login")
+                    Text(text = "Register")
                 }
                 Divider(
                     Modifier
@@ -145,10 +168,20 @@ fun RegisterScreen() {
 }
 
 
+
+
 data class UserForm(
     var email : String="",
     var password : String="",
     var conformEmail: String="",
     var confirmPassword: String=""
-)
+){
+    fun hasValidCredentials() : Boolean{
+        if(email.isNotEmpty() && password.isNotEmpty() && confirmPassword.isNotEmpty()){
+            if(password == confirmPassword) return true
+        }
+
+        return false
+    }
+}
 

@@ -1,7 +1,7 @@
 package com.project.chatapp.auth.services
 
+import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseUser
-import com.project.chatapp.model.User
 import kotlinx.coroutines.flow.Flow
 
 public interface AuthenticationService {
@@ -10,9 +10,9 @@ public interface AuthenticationService {
 
     val currentUserId: String
 
-    suspend fun signIn(email: String, password:String)
+    suspend fun signIn(email: String, password:String) : AuthResult
 
-    suspend fun signUp(email:String, password: String)
+    suspend fun signUp(email:String, password: String)  : AuthResult
 
     fun hasUser(): Boolean
 
