@@ -1,4 +1,4 @@
-package com.project.chatapp.main_app
+package com.project.chatapp.presentation
 
 import android.content.Context
 import android.content.pm.PackageManager
@@ -39,11 +39,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.project.chatapp.BaseActivity
-import com.project.chatapp.main_app.chats_screens.ChatsScreen
+import com.project.chatapp.presentation.chats_screens.ChatsScreen
 import com.project.chatapp.model.User
 import com.project.chatapp.ui.theme.ChatAppTheme
-import com.project.chatapp.main_app.status_screen.UpdatesScreen
-import com.project.chatapp.main_app.viewmodels.MainAppViewModel
+import com.project.chatapp.presentation.status_screen.UpdatesScreen
+import com.project.chatapp.presentation.viewmodels.MainAppViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -62,8 +62,8 @@ class HomeScreenActivity : BaseActivity() {
             // TODO: Show Dialog to get permission
         }else{
             lifecycleScope.launch {
-                val contacts = getAllContacts(this@HomeScreenActivity)
-                mainAppViewModel.setListOfContacts(contacts)
+//                val contacts = getAllContacts(this@HomeScreenActivity)
+//                mainAppViewModel.setListOfContacts(contacts)
             }
 
         }
@@ -79,7 +79,7 @@ class HomeScreenActivity : BaseActivity() {
                 ) {
                     HomeScreen(mainAppViewModel,permissionGranted()) {
                         if (!permissionGranted()) {
-                            checkRequiredPermission()
+                            //checkRequiredPermission()
                         }
                     }
                 }

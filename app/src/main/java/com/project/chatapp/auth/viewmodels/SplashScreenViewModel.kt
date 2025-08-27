@@ -3,6 +3,7 @@ package com.project.chatapp.auth.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.project.chatapp.auth.services.impl.FirebaseAuthImpl
+import com.project.chatapp.domain.firebase_repository.FBUserRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,6 +15,8 @@ class SplashScreenViewModel : ViewModel() {
     val isLoading = mutableStateFlow.asStateFlow()
 
     val authenticationService = FirebaseAuthImpl()
+
+    val fbUserRepo = FBUserRepository()
 
     init {
         viewModelScope.launch {

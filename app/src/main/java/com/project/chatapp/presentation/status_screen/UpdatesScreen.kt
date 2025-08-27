@@ -1,4 +1,4 @@
-package com.project.chatapp.main_app.status_screen
+package com.project.chatapp.presentation.status_screen
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize

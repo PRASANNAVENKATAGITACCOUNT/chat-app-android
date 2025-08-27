@@ -18,13 +18,13 @@
         tools:targetApi="31">
 
         <activity
-            android:name=".main_app.chats_screens.ChatScreenActivity"
+            android:name=".presentation.chats_screens.ChatScreenActivity"
             android:windowSoftInputMode="adjustResize"
             />
 
         <activity android:name=".auth.LoginActivity" />
 
-        <activity android:name=".main_app.HomeScreenActivity"/>
+        <activity android:name=".presentation.HomeScreenActivity"/>
         <activity android:name=".BaseActivity"/>
 
         <activity

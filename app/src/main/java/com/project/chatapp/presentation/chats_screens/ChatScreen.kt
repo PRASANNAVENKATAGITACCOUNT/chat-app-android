@@ -1,4 +1,4 @@
-package com.project.chatapp.main_app.chats_screens
+package com.project.chatapp.presentation.chats_screens
 
 import android.net.Uri
 import androidx.compose.foundation.background

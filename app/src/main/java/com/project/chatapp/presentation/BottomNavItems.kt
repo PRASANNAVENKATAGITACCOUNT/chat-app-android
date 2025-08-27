@@ -1,4 +1,4 @@
-package com.project.chatapp.main_app
+package com.project.chatapp.presentation
 
 import com.project.chatapp.R
 

@@ -8,7 +8,6 @@ data class User(
     val uid: String="",
     var username:String="",
     val email: String="",
-    var password:String="",
     val isOnline: Boolean=false,
     var lastSeen: Long = System.currentTimeMillis(),
     var createdAt: Long = System.currentTimeMillis(),

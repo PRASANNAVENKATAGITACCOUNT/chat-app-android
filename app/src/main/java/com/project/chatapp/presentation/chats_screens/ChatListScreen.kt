@@ -1,4 +1,4 @@
-package com.project.chatapp.main_app.chats_screens
+package com.project.chatapp.presentation.chats_screens
 
 
 import android.content.Intent
@@ -43,11 +43,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import com.project.chatapp.main_app.chats_screens.constants.CONTACT_SELECTED
-import com.project.chatapp.main_app.viewmodels.MainAppViewModel
+import com.project.chatapp.presentation.viewmodels.MainAppViewModel
 import com.project.chatapp.model.User
+import com.project.chatapp.presentation.common.Constants.CONTACT_SELECTED
 import com.project.chatapp.ui.theme.DARK_GREEN
-import kotlinx.coroutines.flow.StateFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

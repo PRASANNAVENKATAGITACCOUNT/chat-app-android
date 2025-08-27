@@ -10,7 +10,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.project.chatapp.BaseActivity
 import com.project.chatapp.auth.viewmodels.SplashScreenViewModel
-import com.project.chatapp.main_app.HomeScreenActivity
+import com.project.chatapp.presentation.HomeScreenActivity
 import com.project.chatapp.ui.theme.ChatAppTheme
 import kotlinx.coroutines.launch
 
