@@ -4,7 +4,11 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.AuthResult
+import com.google.firebase.database.FirebaseDatabase
 import com.project.chatapp.auth.services.impl.FirebaseAuthImpl
+import com.project.chatapp.domain.Constants
+import com.project.chatapp.domain.firebase_repository.FBUserRepository
+import com.project.chatapp.model.User
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -16,10 +20,9 @@ class LoginViewModel: ViewModel() {
         val TAG="LoginActivity "
     }
 
-//    private val _user = MutableStateFlow(User())
-//    val user = _user.asStateFlow()
+    val fbUserRepo = FBUserRepository()
 
-    val authenticationService = FirebaseAuthImpl()
+    val authenticationService = FirebaseAuthImpl
 
 
 
@@ -34,14 +37,24 @@ class LoginViewModel: ViewModel() {
 
 
     suspend fun signInUser(email: String, password: String): AuthResult {
+
         return withContext(Dispatchers.IO) {
             authenticationService.signIn(email, password)
         }
     }
 
-    suspend fun signUpUser(email: String, password: String): AuthResult {
+    suspend fun signUpUser(email: String, password: String) : AuthResult? {
+
         return withContext(Dispatchers.IO) {
-            authenticationService.signUp(email, password)
+            val authResult=authenticationService.signUp(email, password)
+            authResult
+        }
+    }
+
+    fun saveUserInDB(user: User, onResult :(String)->Unit){
+        fbUserRepo.createOrUpdateUser(user){ result->
+            onResult(result)
+            Log.d("vgnbh", result)
         }
     }
 

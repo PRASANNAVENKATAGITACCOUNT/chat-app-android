@@ -1,10 +1,10 @@
 package com.project.chatapp.model
 
 data class Message(
-    val id: String = "",
+    var id: String = "",
     val senderId: String = "",
     val content: String = "",
-    val messageType: MessageType = MessageType.TEXT,
+    val messageType: String = MessageType.TEXT.toString(),
     val timestamp: Long = System.currentTimeMillis(),
     val deliveryStatus: DeliveryStatus = DeliveryStatus.SENT,
     val editedAt: Long? = null,

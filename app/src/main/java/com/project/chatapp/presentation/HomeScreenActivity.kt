@@ -1,6 +1,7 @@
 package com.project.chatapp.presentation
 
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
@@ -14,7 +15,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -31,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
@@ -39,6 +44,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.project.chatapp.BaseActivity
+import com.project.chatapp.auth.LoginActivity
 import com.project.chatapp.presentation.chats_screens.ChatsScreen
 import com.project.chatapp.model.User
 import com.project.chatapp.ui.theme.ChatAppTheme
@@ -48,11 +54,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+
 class HomeScreenActivity : BaseActivity() {
 
     private val mainAppViewModel: MainAppViewModel by viewModels()
 
     val permissions  = arrayOf(android.Manifest.permission.READ_CONTACTS)
+
+    lateinit var context: Context
 
     private var requestPermissionLauncher : ActivityResultLauncher<String>
             =registerForActivityResult(
@@ -77,10 +86,14 @@ class HomeScreenActivity : BaseActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    HomeScreen(mainAppViewModel,permissionGranted()) {
+                    context=this
+                    HomeScreen(mainAppViewModel,permissionGranted(),{
                         if (!permissionGranted()) {
                             //checkRequiredPermission()
                         }
+                    }) {
+                        startActivity(Intent(context, LoginActivity::class.java))
+                        finish()
                     }
                 }
             }
@@ -105,26 +118,38 @@ class HomeScreenActivity : BaseActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(mainAppViewModel: MainAppViewModel, isPermissionGranted:Boolean, askPermission:()->Unit) {
+fun HomeScreen(mainAppViewModel: MainAppViewModel,
+               isPermissionGranted:Boolean,
+               askPermission:()->Unit,
+               logOut:()-> Unit) {
     askPermission()
     val context= LocalContext.current
     LaunchedEffect(isPermissionGranted) {
-        if(isPermissionGranted && mainAppViewModel.listOfContacts.value.isEmpty()) {
+        if(isPermissionGranted && mainAppViewModel.listOfConnectedUser.value.isEmpty()) {
             mainAppViewModel.setListOfContacts(getAllContacts(context))
-            Log.d("nfvgj","${mainAppViewModel.listOfContacts.value}")
+            Log.d("nfvgj","${mainAppViewModel.listOfConnectedUser.value}")
         }
     }
 
     val navController = rememberNavController()
     Scaffold (
         bottomBar = { HomeScreenBottomNav(navController) },
-        modifier = Modifier
+        modifier = Modifier,
     ){
         Column(
             modifier = Modifier.padding(it)
         ) {
             NavHost(navController = navController, startDestination = BottomNavItems.ChatsScreen.route) {
-                composable(BottomNavItems.ChatsScreen.route) {ChatsScreen()}
+                composable(BottomNavItems.ChatsScreen.route) {ChatsScreen(){
+                   mainAppViewModel.launchCatching {
+                       try {
+                           mainAppViewModel.authenticationService.signOut()
+                           logOut()
+                       }catch (exception: Exception){
+                           Log.d("vggfh", "HomeScreen: ${exception.message}")
+                       }
+                   }
+                } }
                 composable(BottomNavItems.UpdatesScreen.route) {UpdatesScreen()}
             }
         }
@@ -210,6 +235,16 @@ fun HomeScreenBottomNav(navController: NavHostController) {
                 }
             )
         }
+    }
+}
+
+@Preview
+@Composable
+fun FloatingActionBar(onClickButton:()-> Unit={}) {
+    FloatingActionButton(onClick = {
+        onClickButton()
+    }) {
+        Icon(imageVector = Icons.Default.Add, contentDescription = "")
     }
 }
 

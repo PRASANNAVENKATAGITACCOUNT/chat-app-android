@@ -1,8 +1,8 @@
 package com.project.chatapp.model
 
 data class Conversation(
-    val id: String = "",
-    val participants: Map<String, Boolean> = emptyMap(), // List of user IDs
+    val id : String="",
+    val participants: List<String> = emptyList(), // List of user IDs
     val type: ConversationType = ConversationType.DIRECT,
     val title: String = "", // For group chats
     val lastMessage: LastMessage? = null,

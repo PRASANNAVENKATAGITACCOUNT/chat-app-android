@@ -12,9 +12,9 @@ public interface AuthenticationService {
 
     suspend fun signIn(email: String, password:String) : AuthResult
 
-    suspend fun signUp(email:String, password: String)  : AuthResult
+    suspend fun signUp(email:String, password: String)  : AuthResult?
 
-    fun hasUser(): Boolean
+    fun hasUser(onResult:(Boolean)->Unit)
 
     suspend fun signOut()
 

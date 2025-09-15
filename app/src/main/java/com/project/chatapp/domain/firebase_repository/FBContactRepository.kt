@@ -1,5 +1,6 @@
 package com.project.chatapp.domain.firebase_repository
 
+import android.util.Log
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.FirebaseDatabase
@@ -31,7 +32,6 @@ class FBContactRepository {
     fun getUserConnections(
         userId: String,
         getConnectedUser: (List<User>) -> Unit) {
-
         contactRef.child(userId).get()
             .addOnSuccessListener { snapshot ->
                 val contactIds = snapshot.children.mapNotNull { it.key }
@@ -40,6 +40,7 @@ class FBContactRepository {
                 val tasks = contactIds.map { contactId ->
                     userRef.child(contactId).get()
                 }
+                Log.d("bbchf", "Success getUserConnections: $contactIds")
 
                 Tasks.whenAllSuccess<DataSnapshot>(tasks)
                     .addOnSuccessListener { results ->
@@ -48,8 +49,12 @@ class FBContactRepository {
                         }
                         getConnectedUser(usersList)
                     }
+                    .addOnFailureListener {e->
+                        Log.d("bbchf", "getUser: ${e.message}")
+                    }
             }
-            .addOnFailureListener {
+            .addOnFailureListener {e->
+                Log.d("bbchf", "getUserConnections: ${e.message}")
                 getConnectedUser(emptyList())
             }
     }

@@ -2,6 +2,7 @@ package com.project.chatapp.auth.screens
 
 import android.content.Intent
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,6 +31,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.auth.FirebaseAuthException
 import com.project.chatapp.R
 import com.project.chatapp.auth.viewmodels.LoginViewModel
+import com.project.chatapp.model.User
 import com.project.chatapp.presentation.HomeScreenActivity
 
 
@@ -98,8 +100,17 @@ fun RegisterScreen(loginViewModel: LoginViewModel = viewModel<LoginViewModel>())
                                     email = userData.email,
                                     password = userData.password
                                 )
-                                authResult.let {
+                                authResult?.let {
                                     if(it.user!=null){
+                                        it.user?.let {currentUser->
+                                            val user = User(
+                                                uid=currentUser.uid,
+                                                email = currentUser.email?:"",
+                                            )
+                                            loginViewModel.saveUserInDB(user){ result->
+                                                Toast.makeText(context, result, Toast.LENGTH_SHORT).show()
+                                            }
+                                        }
                                         context.startActivity(intent)
                                         Log.d(LoginViewModel.TAG, "RegisterScreen: User created and authenticated")
                                     }else{

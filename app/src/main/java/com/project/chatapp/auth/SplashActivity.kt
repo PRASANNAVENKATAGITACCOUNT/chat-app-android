@@ -3,6 +3,7 @@ package com.project.chatapp.auth
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.material3.Text
@@ -27,12 +28,14 @@ class SplashActivity: BaseActivity() {
         }
 
         lifecycleScope.launch {
-            if(splashScreenViewModel.isUserPresent()){
-                val homeActivityIntent = Intent(context, HomeScreenActivity::class.java)
-                startActivity(homeActivityIntent)
-            }else{
-                val loginActivityIntent = Intent(context, LoginActivity::class.java)
-                startActivity(loginActivityIntent)
+            splashScreenViewModel.isUserPresent{
+                if(it){
+                    val homeActivityIntent = Intent(context, HomeScreenActivity::class.java)
+                    startActivity(homeActivityIntent)
+                }else{
+                    val loginActivityIntent = Intent(context, LoginActivity::class.java)
+                    startActivity(loginActivityIntent)
+                }
             }
         }
 

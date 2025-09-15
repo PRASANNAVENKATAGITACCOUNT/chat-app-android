@@ -1,17 +1,18 @@
 package com.project.chatapp.presentation.chats_screens
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -35,8 +36,8 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -47,37 +48,54 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.project.chatapp.R
 import com.project.chatapp.model.User
 import com.project.chatapp.model.Message
+import com.project.chatapp.presentation.viewmodels.ChatScreenViewModel
 
 
-@Preview
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatScreen(user:User=User(), createMessage:(Message)->Unit={}) {
+fun ChatScreen(currentUserUID : String="", connectedUserId: String="") {
+    val chatScreenViewModel : ChatScreenViewModel= viewModel()
 
-    val listOfMessages = remember {
-        mutableStateListOf<Message>(
-            Message( content = "Hello World"),
-            Message(content = "Hello World 2")
-        )
+    var listOfMessages by remember {
+        mutableStateOf<MutableList<Message>>(mutableListOf())
     }
+
+    if(connectedUserId.isNotEmpty()){
+        chatScreenViewModel.createConversation(currentUserUid = currentUserUID, connectedUserId){ result->
+            result?.let {
+                chatScreenViewModel.getAllMessages(result){
+                    listOfMessages  = it.toMutableList()
+                }
+            }
+        }
+    }
+    chatScreenViewModel.getUser(currentUserUID,connectedUserId)
+    val currentUser by chatScreenViewModel.currentUser.collectAsState()
+    val connectedUser by chatScreenViewModel.connectedUser.collectAsState()
+
 
     Scaffold (
         topBar = {
-            ChatTopAppBar(user)
+            ChatTopAppBar(connectedUser)
                  },
-        bottomBar = {BottomChatAppBar{chatText->
-            val message = Message(content = chatText)
-            listOfMessages.add(message)
-            createMessage(message)
+        contentWindowInsets = WindowInsets(left=0.dp, top = 0.dp, bottom = 0.dp, right = 0.dp),
+        bottomBar = {
+            BottomChatAppBar{chatText->
+            val message = Message(
+                content = chatText,
+                senderId = currentUserUID
+                )
+            chatScreenViewModel.createMessage(message)
         } },
-        modifier = Modifier.padding(WindowInsets.systemBars.asPaddingValues())
+        modifier = Modifier
     ){
         Column (
             modifier = Modifier
@@ -89,8 +107,8 @@ fun ChatScreen(user:User=User(), createMessage:(Message)->Unit={}) {
                     .fillMaxSize()
                     .padding(5.dp)
             ) {
-                items(emptyList<Message>()){ message->
-                    Chat(user.uid,message)
+                items(listOfMessages){ message->
+                    Chat(currentUserUID,message)
                 }
             }
         }
@@ -101,15 +119,16 @@ fun ChatScreen(user:User=User(), createMessage:(Message)->Unit={}) {
 
 @Composable
 fun Chat(uid: String, message: Message=Message(content = "Hello ")) {
+    Log.d("bfvjnd", "Chat: $uid ${message.id}")
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
             .padding(2.dp),
-        horizontalAlignment = if(message.senderId!= uid){
-            Alignment.End
-        }else{
+        horizontalAlignment = if(message.senderId== uid){
             Alignment.Start
+        }else{
+            Alignment.End
         }
         )
      {
@@ -131,7 +150,7 @@ fun Chat(uid: String, message: Message=Message(content = "Hello ")) {
                 modifier = Modifier
                     .wrapContentWidth()
                     .background(
-                        color = if (message.senderId!= uid) {
+                        color = if (message.senderId != uid) {
                             Color.Blue
                         } else {
                             Color.Green
@@ -147,7 +166,8 @@ fun Chat(uid: String, message: Message=Message(content = "Hello ")) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatTopAppBar(user: User= User(username = "dummy")) {
+fun ChatTopAppBar(user: User?) {
+    val connectedUser = user ?: User(username = "dummy")
     Surface (shadowElevation = 8.dp){
         TopAppBar(
             title = {
@@ -157,7 +177,7 @@ fun ChatTopAppBar(user: User= User(username = "dummy")) {
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     AsyncImage(
-                        model = user.getContactPhotoUri()?:Uri.EMPTY,
+                        model = connectedUser.getContactPhotoUri()?:Uri.EMPTY,
                         contentDescription = "",
                         modifier = Modifier
                             .width(45.dp)
@@ -166,7 +186,7 @@ fun ChatTopAppBar(user: User= User(username = "dummy")) {
                     Column (
                         modifier = Modifier.padding(start = 5.dp)
                     ){
-                        Text(text = if (user.username.isEmpty()) user.phoneNumber else user.username, style = TextStyle(fontSize = 15.sp))
+                        Text(text = if (connectedUser.username.isEmpty()) connectedUser.phoneNumber else connectedUser.username, style = TextStyle(fontSize = 15.sp))
                         Text(text = "Last Screen Todayat 8:23 pm", style = TextStyle(fontSize = 8.sp))
                     }
                     IconButton(onClick = { }) {
@@ -188,23 +208,31 @@ fun ChatTopAppBar(user: User= User(username = "dummy")) {
 
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomChatAppBar(onChatComplete:(String)->Unit) {
+fun BottomChatAppBar(createChat:(String)->Unit) {
     var chatText by remember {
         mutableStateOf("")
     }
+
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = Color.Transparent)
+            .padding(8.dp)
+            .imePadding()
+            .navigationBarsPadding(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
-    ) {
+        horizontalArrangement = Arrangement.Center,
+    )
+    {
         TextField(
             value = chatText,
             onValueChange =
-            { text ->
-                chatText = text
-            },
+                { text ->
+                    chatText = text
+                },
             leadingIcon = {
                 IconButton(onClick = { }) {
                     Icon(
@@ -246,7 +274,7 @@ fun BottomChatAppBar(onChatComplete:(String)->Unit) {
             }
         }else {
             IconButton(onClick = {
-                onChatComplete(chatText)
+                createChat(chatText)
                 chatText = ""
             }) {
                 Icon(
@@ -260,6 +288,7 @@ fun BottomChatAppBar(onChatComplete:(String)->Unit) {
             }
         }
     }
+
 }
 
 
